@@ -1,4 +1,5 @@
 while True:
-    a = 4
-    b = 3
-    a = a + b
+    while True:
+        a = 4
+        b = 3
+
