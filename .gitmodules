@@ -1,0 +1,3 @@
+[submodule "pyscasm"]
+	path = pyscasm
+	url = https://github.com/thecharlesjenkins/pyscasm.git

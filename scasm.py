@@ -2,6 +2,8 @@ import ast
 
 
 class AssignWrapper(ast.NodeTransformer):
+    current_while = 0
+    labels = set()
     operations = []
     variables = {}
 
@@ -15,6 +17,13 @@ class AssignWrapper(ast.NodeTransformer):
                 self.operations += ["STORE " + target.id]
         # self.generic_visit(node)
 
+    def visit_While(self, node: ast.While):
+        this_while = self.current_while
+        self.operations += ["while_" + str(self.current_while) + ":"]
+        self.current_while += 1
+        self.generic_visit(node)
+        self.operations += ["JUMP " + "while_" + str(this_while)]
+
     def visit_BinOp(self, node):
         print('Node type: BinOp and fields: ', node._fields)
         print(ast.dump(node))
@@ -26,8 +35,8 @@ with open('add_values.sca', 'r') as file:
 # print(ast.dump(tree))
 
 wrapper = AssignWrapper()
-tree = wrapper.visit(tree)
 print(ast.dump(tree))
+tree = wrapper.visit(tree)
 
 result = ""
 
@@ -40,3 +49,12 @@ for variable, value in wrapper.variables.items():
 print(result)
 print(wrapper.operations)
 print(wrapper.variables)
+
+with open('result.acm', 'w') as file:
+    file.writelines(result)
+
+import subprocess
+return_code = subprocess.call(['python', 'pyscasm/scasm.py', '-o', 'drive', '-a', 'result.acm'])
+
+if return_code != 0:
+    print("Process did not complete cleanly, return code : ", return_code)
