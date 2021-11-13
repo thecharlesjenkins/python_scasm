@@ -1,6 +1,12 @@
-while_0:
-while_1:
 a:     DW 4
 b:     DW 3
-JUMP while_1
-JUMP while_0
+
+;Binary Op
+LOAD     a
+ADD     b
+
+;Binary Op
+LOAD     a
+ADDI     4
+LOAD     a
+OUT     0x0A0
