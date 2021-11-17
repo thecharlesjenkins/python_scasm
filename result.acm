@@ -1,12 +1,10 @@
 a:     DW 4
 b:     DW 3
 
-;Binary Op
 LOAD     a
 ADD     b
 
-;Binary Op
 LOAD     a
 ADDI     4
 LOAD     a
-OUT     0x0A0
+OUT     160

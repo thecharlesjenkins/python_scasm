@@ -3,6 +3,9 @@ from inspect import currentframe
 from io import UnsupportedOperation
 from typing import Any
 
+import yaml
+from yaml import Loader
+
 
 class AssignWrapper(ast.NodeTransformer):
     current_while = 0
@@ -11,8 +14,10 @@ class AssignWrapper(ast.NodeTransformer):
     operations = []
     variables = {}
 
-
-    homogeneous_address = "0x0A0"
+    def __init__(self):
+        with open('scasm_conf.yaml', 'r') as file:
+            self.conf = yaml.load(file, Loader=Loader)
+        self.homogeneous_address = self.conf['io_addresses']['homogeneous']
 
     def maybe_newline(self):
         """Adds a newline if it isn't the start of generated source"""
