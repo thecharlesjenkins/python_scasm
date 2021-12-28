@@ -3,5 +3,6 @@ b = 3
 
 a = a + b
 a = a + 4
+a = 3 + a
 
-homogeneous a
+# homogeneous a

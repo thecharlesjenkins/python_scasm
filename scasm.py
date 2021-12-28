@@ -7,7 +7,7 @@ import yaml
 from yaml import Loader
 
 
-class AssignWrapper(ast.NodeTransformer):
+class AssignWrapper(ast.NodeVisitor):
     current_while = 0
 
     labels = set()
@@ -68,13 +68,16 @@ class AssignWrapper(ast.NodeTransformer):
     def visit_Assign(self, node: ast.Assign):
         self.maybe_newline()
         if len(node.targets) > 1:
-            raise UnsupportedOperation("Multi-assign not supported")
+            raise UnsupportedOperation("Multi-assign not yet supported")
 
         if node.targets[0].id not in self.labels:
             self.write(f'{node.targets[0].id}:     DW ')
             self.labels.add(node.targets[0].id)
-
-        self.traverse(node.value)
+            self.traverse(node.value)
+        else:
+            self.traverse(node.value)
+            self.write('\n')
+            self.write(f'STORE    {node.targets[0].id}')
 
     def visit_While(self, node: ast.While):
         self.maybe_newline()
@@ -94,14 +97,28 @@ class AssignWrapper(ast.NodeTransformer):
 
     def visit_Name(self, node: ast.Name):
         if isinstance(node.ctx, ast.Load):
-            self.write(f"LOAD     {node.id}")
+            self.write(node.id)
+
+    def load_value(self, node):
+        if isinstance(node, ast.Constant):
+            self.write('LOADI     ')
+        else:
+            self.write('LOAD      ')
+        
+        self.traverse(node)
 
     def visit_BinOp(self, node):
         self.maybe_newline()
 
-        self.traverse(node.left)
+        self.load_value(node.left)
         self.write("\n")
         if isinstance(node.op, ast.Add):
+            if isinstance(node.right, ast.Name):
+                self.write(f"ADD     {node.right.id}")
+            else:
+                self.write(f"ADDI     ")
+                self.traverse(node.right)
+        if isinstance(node.op, ast.Mult):
             if isinstance(node.right, ast.Name):
                 self.write(f"ADD     {node.right.id}")
             else:
